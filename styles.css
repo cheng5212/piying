@@ -1,0 +1,109 @@
+/* 全局变量 */
+:root {
+  --primary: #b71c1c;
+  --secondary: #f57c00;
+  --dark: #212121;
+  --light: #f5f5f5;
+}
+
+/* 自定义工具类 */
+@layer utilities {
+  .content-auto {
+    content-visibility: auto;
+  }
+
+  .text-shadow {
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+
+  .transition-custom {
+    transition: all 0.3s ease;
+  }
+
+  .animate-bounce-slow {
+    animation: bounce 3s infinite;
+  }
+}
+
+/* 全局样式 */
+body {
+  font-family: 'Inter', sans-serif;
+}
+
+/* 导航栏样式 */
+#navbar {
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(5px);
+}
+
+#navbar.scrolled {
+  background-color: rgba(0, 0, 0, 0.9);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* 轮播图样式 */
+.carousel-item.active {
+  opacity: 1;
+}
+
+/* 产品筛选按钮样式 */
+.product-filter-btn.active {
+  background-color: var(--primary);
+  color: white;
+}
+
+/* 时间线样式 */
+.process-step {
+  position: relative;
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .process-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 1px;
+    height: 12px;
+    background-color: var(--primary);
+  }
+}
+
+/* 动画效果 */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.8s ease forwards;
+}
+
+.delay-100 {
+  animation-delay: 0.1s;
+}
+
+.delay-200 {
+  animation-delay: 0.2s;
+}
+
+.delay-300 {
+  animation-delay: 0.3s;
+}
+
+.delay-400 {
+  animation-delay: 0.4s;
+}
+
+.delay-500 {
+  animation-delay: 0.5s;
+}
