@@ -19,9 +19,27 @@ async function updateHtmlFiles() {
             console.log(`正在处理 ${file}...`);
             let content = await fs.readFile(file, 'utf8');
             
+            // 修复重复的CDN前缀
+            content = content.replace(
+                /https:\/\/cdn\.jsdelivr\.net\/gh\/cheng5212\/piying\/https:\/\/cdn\.jsdelivr\.net\/gh\/cheng5212\/piying\//g,
+                'https://cdn.jsdelivr.net/gh/cheng5212/piying/'
+            );
+            
+            // 更新旧的图片路径到新的优化路径
+            content = content.replace(
+                /https:\/\/cdn\.jsdelivr\.net\/gh\/cheng5212\/piying\/img\/([^"'\s]+)\.webp/g,
+                (match, fileName) => {
+                    const baseFileName = path.parse(fileName).name;
+                    if (urlMap[baseFileName]) {
+                        return urlMap[baseFileName].lg;
+                    }
+                    return match;
+                }
+            );
+            
             // 更新img标签
             content = content.replace(
-                /<img[^>]*src=["']([^"']+)["'][^>]*>/g,
+                /<img[^>]*src=[\"']([^\"']+)[\"'][^>]*>/g,
                 (match, src) => {
                     const fileName = path.basename(src);
                     const baseFileName = path.parse(fileName).name;
@@ -29,9 +47,9 @@ async function updateHtmlFiles() {
                     if (urlMap[fileName] || urlMap[baseFileName]) {
                         const urls = urlMap[fileName] || urlMap[baseFileName];
                         return `<picture>
-    <source media="(min-width: 1024px)" srcset="${urls.lg}" />
-    <source media="(min-width: 640px)" srcset="${urls.md}" />
-    <img src="${urls.sm}" alt="" loading="lazy" />
+    <source media="(min-width: 1024px)" srcset="${urls.lg}" type="image/webp">
+    <source media="(min-width: 640px)" srcset="${urls.md}" type="image/webp">
+    <img src="${urls.sm}" alt="" loading="lazy" class="w-full h-full object-cover">
 </picture>`;
                     }
                     return match;
@@ -47,7 +65,6 @@ async function updateHtmlFiles() {
                     
                     if (urlMap[fileName] || urlMap[baseFileName]) {
                         const urls = urlMap[fileName] || urlMap[baseFileName];
-                        // 使用最大尺寸作为背景图
                         return `background-image: url('${urls.lg}')`;
                     }
                     return match;
@@ -72,10 +89,7 @@ async function updateHtmlFiles() {
             );
             
             // 保存更新后的文件
-            const backupFile = `${file}.bak`;
-            await fs.writeFile(backupFile, content);
-            await fs.rename(backupFile, file);
-            
+            await fs.writeFile(file, content, 'utf8');
             console.log(`✓ ${file} 更新完成`);
             
         } catch (error) {
