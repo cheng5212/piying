@@ -15,8 +15,8 @@ imageUrls.forEach(image => {
     urlMap[nameWithoutExt] = image.urls;
 });
 
-async function updateHtmlFiles() {
-    const files = ['index.html', 'payment.html', 'purchase.html'];
+async function updateFiles() {
+    const files = ['index.html', 'payment.html', 'purchase.html', 'Header.js'];
     
     for (const file of files) {
         try {
@@ -53,6 +53,22 @@ async function updateHtmlFiles() {
                 }
             );
             
+            // 更新srcset属性
+            content = content.replace(
+                /srcset=["']([^"']+)\.(webp|jpg|jpeg|png|gif)["']/g,
+                (match, url, ext) => {
+                    if (url.includes('img/')) {
+                        const fileName = path.basename(url);
+                        const baseFileName = path.parse(fileName).name;
+                        if (urlMap[baseFileName]) {
+                            const size = url.endsWith('-sm') ? 'sm' : url.endsWith('-md') ? 'md' : 'lg';
+                            return `srcset="${urlMap[baseFileName][size]}"`;
+                        }
+                    }
+                    return match;
+                }
+            );
+            
             // 更新img标签
             content = content.replace(
                 /<img[^>]*src=[\"']([^\"']+)[\"'][^>]*>/g,
@@ -62,10 +78,16 @@ async function updateHtmlFiles() {
                     
                     if (urlMap[fileName] || urlMap[baseFileName]) {
                         const urls = urlMap[fileName] || urlMap[baseFileName];
+                        // 保留原始的class和alt属性
+                        const classMatch = match.match(/class=["']([^"']+)["']/);
+                        const altMatch = match.match(/alt=["']([^"']+)["']/);
+                        const className = classMatch ? classMatch[1] : 'w-full h-full object-cover';
+                        const alt = altMatch ? altMatch[1] : '';
+                        
                         return `<picture>
     <source media="(min-width: 1024px)" srcset="${urls.lg}" type="image/webp">
     <source media="(min-width: 640px)" srcset="${urls.md}" type="image/webp">
-    <img src="${urls.sm}" alt="" loading="lazy" class="w-full h-full object-cover">
+    <img src="${urls.sm}" alt="${alt}" loading="lazy" class="${className}">
 </picture>`;
                     }
                     return match;
@@ -109,13 +131,17 @@ async function updateHtmlFiles() {
             console.log(`✓ ${file} 更新完成`);
             
         } catch (error) {
-            console.error(`处理 ${file} 时出错:`, error);
+            if (error.code === 'ENOENT') {
+                console.log(`跳过不存在的文件: ${file}`);
+            } else {
+                console.error(`处理 ${file} 时出错:`, error);
+            }
         }
     }
 }
 
 // 运行更新
-updateHtmlFiles().then(() => {
+updateFiles().then(() => {
     console.log('所有文件更新完成！');
 }).catch(error => {
     console.error('更新过程中出错:', error);
