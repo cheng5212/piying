@@ -7,12 +7,20 @@ const urlMap = {};
 imageUrls.forEach(image => {
     const fileName = image.file;
     const baseFileName = path.parse(fileName).name;
-    urlMap[fileName] = image.urls;
-    urlMap[baseFileName] = image.urls;
+    
+    // 转换Cloudinary URL为jsDelivr URL
+    const urls = {
+        sm: `https://cdn.jsdelivr.net/gh/cheng5212/piying/img-optimized/${baseFileName}-sm.webp`,
+        md: `https://cdn.jsdelivr.net/gh/cheng5212/piying/img-optimized/${baseFileName}-md.webp`,
+        lg: `https://cdn.jsdelivr.net/gh/cheng5212/piying/img-optimized/${baseFileName}-lg.webp`
+    };
+    
+    urlMap[fileName] = urls;
+    urlMap[baseFileName] = urls;
     
     // 添加不带扩展名的映射
     const nameWithoutExt = baseFileName.replace(/\.[^/.]+$/, "");
-    urlMap[nameWithoutExt] = image.urls;
+    urlMap[nameWithoutExt] = urls;
 });
 
 async function updateFiles() {
@@ -29,98 +37,63 @@ async function updateFiles() {
                 'https://cdn.jsdelivr.net/gh/cheng5212/piying/'
             );
             
-            // 更新旧的图片路径到新的优化路径
+            // 更新所有图片URL到优化版本
             content = content.replace(
-                /https:\/\/cdn\.jsdelivr\.net\/gh\/cheng5212\/piying\/img\/([^"'\s]+)\.(webp|jpg|jpeg|png|gif)/g,
-                (match, fileName) => {
-                    const baseFileName = path.parse(fileName).name;
-                    if (urlMap[baseFileName]) {
-                        return urlMap[baseFileName].lg;
-                    }
-                    return match;
-                }
-            );
-            
-            // 更新本地图片路径
-            content = content.replace(
-                /src=["']img\/([^"']+)\.(webp|jpg|jpeg|png|gif)["']/g,
-                (match, fileName) => {
-                    const baseFileName = path.parse(fileName).name;
-                    if (urlMap[baseFileName]) {
-                        return `src="${urlMap[baseFileName].lg}"`;
-                    }
-                    return match;
-                }
-            );
-            
-            // 更新srcset属性
-            content = content.replace(
-                /srcset=["']([^"']+)\.(webp|jpg|jpeg|png|gif)["']/g,
-                (match, url, ext) => {
-                    if (url.includes('img/')) {
-                        const fileName = path.basename(url);
-                        const baseFileName = path.parse(fileName).name;
-                        if (urlMap[baseFileName]) {
-                            const size = url.endsWith('-sm') ? 'sm' : url.endsWith('-md') ? 'md' : 'lg';
-                            return `srcset="${urlMap[baseFileName][size]}"`;
-                        }
-                    }
-                    return match;
-                }
-            );
-            
-            // 更新img标签
-            content = content.replace(
-                /<img[^>]*src=[\"']([^\"']+)[\"'][^>]*>/g,
+                /<img[^>]*src=["']([^"']+)["'][^>]*>/g,
                 (match, src) => {
+                    // 如果是data:URL，保持不变
+                    if (src.startsWith('data:')) return match;
+                    
                     const fileName = path.basename(src);
                     const baseFileName = path.parse(fileName).name;
                     
-                    if (urlMap[fileName] || urlMap[baseFileName]) {
-                        const urls = urlMap[fileName] || urlMap[baseFileName];
+                    if (urlMap[baseFileName]) {
                         // 保留原始的class和alt属性
                         const classMatch = match.match(/class=["']([^"']+)["']/);
                         const altMatch = match.match(/alt=["']([^"']+)["']/);
-                        const className = classMatch ? classMatch[1] : 'w-full h-full object-cover';
+                        const loadingMatch = match.match(/loading=["']([^"']+)["']/);
+                        
+                        const className = classMatch ? classMatch[1] : '';
                         const alt = altMatch ? altMatch[1] : '';
+                        const loading = loadingMatch ? loadingMatch[1] : 'lazy';
                         
                         return `<picture>
-    <source media="(min-width: 1024px)" srcset="${urls.lg}" type="image/webp">
-    <source media="(min-width: 640px)" srcset="${urls.md}" type="image/webp">
-    <img src="${urls.sm}" alt="${alt}" loading="lazy" class="${className}">
+    <source media="(min-width: 1024px)" srcset="${urlMap[baseFileName].lg}" type="image/webp">
+    <source media="(min-width: 640px)" srcset="${urlMap[baseFileName].md}" type="image/webp">
+    <img src="${urlMap[baseFileName].sm}" alt="${alt}" loading="${loading}" class="${className}">
 </picture>`;
                     }
                     return match;
                 }
             );
             
-            // 更新背景图片URL
+            // 更新背景图片
             content = content.replace(
                 /background-image:\s*url\(['"]?([^'")\s]+)['"]?\)/g,
-                (match, url) => {
-                    const fileName = path.basename(url);
-                    const baseFileName = path.parse(fileName).name;
-                    
-                    if (urlMap[fileName] || urlMap[baseFileName]) {
-                        const urls = urlMap[fileName] || urlMap[baseFileName];
-                        return `background-image: url('${urls.lg}')`;
-                    }
-                    return match;
-                }
-            );
-            
-            // 更新CSS中的其他图片URL
-            content = content.replace(
-                /url\(['"]?([^'")\s]+)['"]?\)/g,
                 (match, url) => {
                     if (url.startsWith('data:')) return match;
                     
                     const fileName = path.basename(url);
                     const baseFileName = path.parse(fileName).name;
                     
-                    if (urlMap[fileName] || urlMap[baseFileName]) {
-                        const urls = urlMap[fileName] || urlMap[baseFileName];
-                        return `url('${urls.lg}')`;
+                    if (urlMap[baseFileName]) {
+                        return `background-image: url('${urlMap[baseFileName].lg}')`;
+                    }
+                    return match;
+                }
+            );
+            
+            // 更新style属性中的背景图片
+            content = content.replace(
+                /style=["'][^"']*background-image:\s*url\(['"]?([^'")\s]+)['"]?\)[^"']*["']/g,
+                (match, url) => {
+                    if (url.startsWith('data:')) return match;
+                    
+                    const fileName = path.basename(url);
+                    const baseFileName = path.parse(fileName).name;
+                    
+                    if (urlMap[baseFileName]) {
+                        return match.replace(url, urlMap[baseFileName].lg);
                     }
                     return match;
                 }

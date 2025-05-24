@@ -9,7 +9,11 @@ const Header = () => {
           <picture>
     <source media="(min-width: 1024px)" srcset="https://res.cloudinary.com/dulrqfvan/image/upload/dpr_auto,f_auto,q_80,w_1920/v1/piying/4ad3000bc82027b36a8c1d9f5058f66.webp?_a=BAMClqXy0" type="image/webp">
     <source media="(min-width: 640px)" srcset="https://res.cloudinary.com/dulrqfvan/image/upload/dpr_auto,f_auto,q_80,w_1024/v1/piying/4ad3000bc82027b36a8c1d9f5058f66.webp?_a=BAMClqXy0" type="image/webp">
-    <img src="https://res.cloudinary.com/dulrqfvan/image/upload/dpr_auto,f_auto,q_80,w_640/v1/piying/4ad3000bc82027b36a8c1d9f5058f66.webp?_a=BAMClqXy0" alt="Logo" loading="lazy" class="w-full h-full object-cover">
+    <picture>
+    <source media="(min-width: 1024px)" srcset="https://cdn.jsdelivr.net/gh/cheng5212/piying/img-optimized/4ad3000bc82027b36a8c1d9f5058f66-lg.webp" type="image/webp">
+    <source media="(min-width: 640px)" srcset="https://cdn.jsdelivr.net/gh/cheng5212/piying/img-optimized/4ad3000bc82027b36a8c1d9f5058f66-md.webp" type="image/webp">
+    <img src="https://cdn.jsdelivr.net/gh/cheng5212/piying/img-optimized/4ad3000bc82027b36a8c1d9f5058f66-sm.webp" alt="Logo" loading="lazy" class="w-full h-full object-cover">
+</picture>
 </picture>
           <span className="ml-2 text-xl font-bold text-white" data-lang-key="logo-text">
             宝鸡非遗皮影
