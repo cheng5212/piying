@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title data-lang-key="products-title">皮影购买</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="navbar">
+            <a href="index.html" class="logo" data-lang-key="logo-text">宝鸡非遗皮影</a>
+            <div class="lang-switcher">
+                <button id="lang-toggle">EN</button>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container">
+        <h1 class="page-title" data-lang-key="products-title">商品购买</h1>
+        <div class="product-detail">
+            <img id="product-image" src="" alt="商品图片" class="product-img">
+            <div class="product-info">
+                <h2 id="product-name" class="product-name"></h2>
+                <div class="quantity-selector">
+                    <label data-lang-key="contact-quantity">购买数量：</label>
+                    <input type="number" id="quantity" min="1" value="1" class="quantity-input">
+                </div>
+            </div>
+        </div>
+
+        <div class="shipping-form">
+            <h3 data-lang-key="contact-info">收货信息</h3>
+            <form id="purchase-form">
+                <div class="form-group">
+                    <label for="address" data-lang-key="contact-address-title">收货地址：</label>
+                    <textarea id="address" required class="form-control"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="phone" data-lang-key="contact-phone-title">联系电话：</label>
+                    <input type="tel" id="phone" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="name" data-lang-key="contact-name-title">客户姓名：</label>
+                    <input type="text" id="name" required class="form-control">
+                </div>
+                <button type="submit" class="btn-primary" data-lang-key="contact-send">去付款</button>
+            </form>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+    <script>
+        // 从URL参数获取商品信息
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('productId');
+        const productName = urlParams.get('productName');
+        const productImage = urlParams.get('productImage');
+
+        // 填充商品信息
+        document.getElementById('product-name').textContent = productName;
+        document.getElementById('product-image').src = productImage;
+
+        // 表单提交处理
+        document.getElementById('purchase-form').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const quantity = document.getElementById('quantity').value;
+            const address = document.getElementById('address').value;
+            const phone = document.getElementById('phone').value;
+            const name = document.getElementById('name').value;
+
+            // 跳转到付款页面，传递购买信息
+            const paymentUrl = `payment.html?productId=${productId}&productName=${encodeURIComponent(productName)}&quantity=${quantity}&address=${encodeURIComponent(address)}&phone=${phone}&name=${encodeURIComponent(name)}`;
+            window.location.href = paymentUrl;
+        });
+    </script>
+</body>
+</html>

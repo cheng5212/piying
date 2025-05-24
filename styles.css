@@ -1,12 +1,13 @@
-/* 全局变量 */
+/* 全局变量：定义项目中常用的颜色值 */
 :root {
-  --primary: #b71c1c;
-  --secondary: #f57c00;
-  --dark: #212121;
-  --light: #f5f5f5;
+  --primary: #c62828; /* 中国红 */
+  --secondary: #2e7d32; /* 墨绿 */
+  --dark: #2d2d2d; /* 深灰 */
+  --light: #f8f5ec; /* 米白 */
+  --heritage-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Cpath d='M10 0L0 10V0h10zM0 30L10 40H0v-10zM30 40L40 30h-10v10zM40 10L30 0v10h10zM10 40L0 30v10h10zM30 0L40 10H30V0zM0 10L10 0v10H0zM40 30L30 40v-10h10zM20 20L15 15h10l-5 5zM15 25h10l-5 5 5 5h-10l5-5z' fill='%23c62828' fill-opacity='0.05'/%3E%3C/svg%3E"); /* 皮影几何纹 */
 }
 
-/* 自定义工具类 */
+/* 自定义工具类：包含常用工具类，可通过@layer utilities调用 */
 @layer utilities {
   .content-auto {
     content-visibility: auto;
@@ -25,15 +26,15 @@
   }
 }
 
-/* 全局样式 */
+/* 全局样式：设置网站默认字体 */
 body {
   font-family: 'Inter', sans-serif;
 }
 
-/* 导航栏样式 */
+/* 导航栏样式：包含默认和滚动时的样式变化 */
 #navbar {
-  background-color: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(5px);
+  background-color: rgba(90, 30, 30, 0.8); /* 深棕红半透明 */
+  backdrop-filter: blur(8px);
 }
 
 #navbar.scrolled {
@@ -41,23 +42,30 @@ body {
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
-/* 轮播图样式 */
+/* 轮播图样式：控制轮播图项的显示状态 */
 .carousel-item.active {
   opacity: 1;
 }
 
-/* 产品筛选按钮样式 */
+/* 产品筛选按钮样式：定义激活状态的按钮样式 */
 .product-filter-btn.active {
-  background-color: var(--primary);
+  background-color: var(--secondary);
   color: white;
+  border: 2px solid var(--primary);
 }
 
-/* 时间线样式 */
+/* 时间线样式：处理步骤的布局和装饰 */
 .process-step {
   position: relative;
 }
 
-/* 响应式设计 */
+/* 响应式设计：移动端下的特殊样式处理 */
+
+.heritage-card {
+  background-image: var(--heritage-pattern);
+  background-size: 40px;
+  background-position: center;
+}
 @media (max-width: 768px) {
   .process-step:not(:last-child)::after {
     content: '';
@@ -71,7 +79,7 @@ body {
   }
 }
 
-/* 动画效果 */
+/* 动画效果：定义页面元素进入动画 */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -106,4 +114,28 @@ body {
 
 .delay-500 {
   animation-delay: 0.5s;
+}
+
+/* 自定义模态框样式 */
+.custom-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background-color: var(--light);
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  font-size: 1.1rem;
+  color: var(--dark);
 }
