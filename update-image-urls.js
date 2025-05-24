@@ -9,6 +9,10 @@ imageUrls.forEach(image => {
     const baseFileName = path.parse(fileName).name;
     urlMap[fileName] = image.urls;
     urlMap[baseFileName] = image.urls;
+    
+    // 添加不带扩展名的映射
+    const nameWithoutExt = baseFileName.replace(/\.[^/.]+$/, "");
+    urlMap[nameWithoutExt] = image.urls;
 });
 
 async function updateHtmlFiles() {
@@ -27,11 +31,23 @@ async function updateHtmlFiles() {
             
             // 更新旧的图片路径到新的优化路径
             content = content.replace(
-                /https:\/\/cdn\.jsdelivr\.net\/gh\/cheng5212\/piying\/img\/([^"'\s]+)\.webp/g,
+                /https:\/\/cdn\.jsdelivr\.net\/gh\/cheng5212\/piying\/img\/([^"'\s]+)\.(webp|jpg|jpeg|png|gif)/g,
                 (match, fileName) => {
                     const baseFileName = path.parse(fileName).name;
                     if (urlMap[baseFileName]) {
                         return urlMap[baseFileName].lg;
+                    }
+                    return match;
+                }
+            );
+            
+            // 更新本地图片路径
+            content = content.replace(
+                /src=["']img\/([^"']+)\.(webp|jpg|jpeg|png|gif)["']/g,
+                (match, fileName) => {
+                    const baseFileName = path.parse(fileName).name;
+                    if (urlMap[baseFileName]) {
+                        return `src="${urlMap[baseFileName].lg}"`;
                     }
                     return match;
                 }
