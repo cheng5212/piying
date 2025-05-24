@@ -122,89 +122,102 @@ document.addEventListener('DOMContentLoaded', function() {
     // 图片加载优化
     class ImageLoader {
         constructor() {
-            this.observer = new IntersectionObserver(this.handleIntersection.bind(this), {
+            this.images = document.querySelectorAll('img[data-src]');
+            this.options = {
                 root: null,
-                rootMargin: '50px',
+                rootMargin: '50px 0px',
                 threshold: 0.1
+            };
+            this.imageObserver = new IntersectionObserver(this.handleIntersection.bind(this), this.options);
+            this.init();
+        }
+
+        init() {
+            this.images.forEach(image => {
+                // 添加加载中的类
+                image.classList.add('image-loading');
+                
+                // 创建低质量的预览图
+                if (image.dataset.preview) {
+                    const wrapper = document.createElement('div');
+                    wrapper.className = 'progressive';
+                    image.parentNode.insertBefore(wrapper, image);
+                    wrapper.appendChild(image);
+                    
+                    const preview = new Image();
+                    preview.src = image.dataset.preview;
+                    preview.className = 'preview';
+                    wrapper.insertBefore(preview, image);
+                }
+                
+                // 开始观察图片
+                this.imageObserver.observe(image);
             });
-            
-            this.loadedImages = new Set();
         }
 
         handleIntersection(entries, observer) {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
-                    const img = entry.target;
-                    this.loadImage(img);
-                    observer.unobserve(img);
+                    this.loadImage(entry.target);
+                    observer.unobserve(entry.target);
                 }
             });
         }
 
-        loadImage(img) {
-            if (img.dataset.src && !this.loadedImages.has(img.dataset.src)) {
-                const tempImage = new Image();
-                tempImage.onload = () => {
-                    img.src = tempImage.src;
-                    img.classList.add('fade-in');
-                    img.classList.remove('image-loading');
-                    this.loadedImages.add(img.dataset.src);
-                };
-                tempImage.onerror = () => {
-                    handleImageError(img);
-                };
-                tempImage.src = img.dataset.src;
-            }
+        loadImage(image) {
+            const src = image.dataset.src;
+            
+            // 创建新的Image对象来预加载
+            const img = new Image();
+            
+            img.onload = () => {
+                image.src = src;
+                image.classList.remove('image-loading');
+                image.classList.add('image-loaded');
+                
+                if (image.parentNode.classList.contains('progressive')) {
+                    image.classList.add('reveal');
+                }
+            };
+            
+            img.onerror = () => {
+                image.src = 'path/to/fallback-image.jpg';
+                image.classList.remove('image-loading');
+                console.error('Error loading image:', src);
+            };
+            
+            img.src = src;
         }
-
-        observe(img) {
-            if (img.dataset.src) {
-                img.classList.add('image-loading');
-                this.observer.observe(img);
-            }
-        }
-    }
-
-    // 图片加载错误处理
-    function handleImageError(img) {
-        const fallbackUrl = img.dataset.fallback || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%23f0f0f0"/%3E%3Ctext x="50" y="50" font-family="Arial" font-size="14" fill="%23666" text-anchor="middle" dy=".3em"%3E图片加载失败%3C/text%3E%3C/svg%3E';
-        img.src = fallbackUrl;
-        img.classList.add('image-error');
     }
 
     // 初始化图片加载器
-    const imageLoader = new ImageLoader();
-
-    // 处理所有图片
-    const images = document.querySelectorAll('img[loading="lazy"]');
-    images.forEach(img => {
-        const picture = img.closest('picture');
-        if (picture) {
-            const sources = picture.querySelectorAll('source');
-            
-            // 处理source标签
-            sources.forEach(source => {
-                if (source.srcset) {
-                    source.dataset.srcset = source.srcset;
-                    source.srcset = '';
-                }
-            });
-            
-            // 处理img标签
-            if (img.src) {
-                img.dataset.src = img.src;
-                img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
-                img.classList.add('opacity-0', 'transition-opacity', 'duration-300');
-                
-                // 使用新的图片加载器
-                imageLoader.observe(img);
-            }
-        }
+    document.addEventListener('DOMContentLoaded', () => {
+        new ImageLoader();
     });
 
-    // 为所有图片添加错误处理
-    const allImages = document.querySelectorAll('img');
-    allImages.forEach(img => {
-        img.addEventListener('error', () => handleImageError(img));
+    // 处理图片加载错误
+    function handleImageError(img) {
+        img.onerror = null; // 防止无限循环
+        img.src = 'path/to/fallback-image.jpg';
+        console.error('Image failed to load:', img.dataset.src);
+    }
+
+    // 优化背景图片加载
+    function loadBackgroundImage(element) {
+        const src = element.dataset.bgSrc;
+        if (!src) return;
+
+        const img = new Image();
+        img.onload = () => {
+            element.style.backgroundImage = `url(${src})`;
+            element.classList.add('bg-loaded');
+        };
+        img.src = src;
+    }
+
+    // 初始化所有需要懒加载的背景图片
+    document.addEventListener('DOMContentLoaded', () => {
+        const bgElements = document.querySelectorAll('[data-bg-src]');
+        bgElements.forEach(loadBackgroundImage);
     });
 });

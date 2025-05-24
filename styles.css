@@ -141,47 +141,102 @@ body {
   color: var(--dark);
 }
 
-/* 图片加载状态优化 */
+/* 图片加载相关样式 */
 .image-loading {
-  position: relative;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: loading 1.5s infinite;
-  min-height: 100px;
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    background: #f3f4f6;
+    position: relative;
 }
 
 .image-loading::before {
-  content: "加载中...";
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #666;
-  font-size: 14px;
-  background: rgba(255, 255, 255, 0.8);
-  padding: 5px 10px;
-  border-radius: 4px;
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 30px;
+    height: 30px;
+    border: 3px solid #e5e7eb;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
 }
 
-@keyframes loading {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+.image-loaded {
+    opacity: 1;
 }
 
-/* 图片加载完成动画 */
-img {
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
+@keyframes spin {
+    to {
+        transform: translate(-50%, -50%) rotate(360deg);
+    }
 }
 
-img[src]:not([src=""]) {
-  opacity: 1;
+/* 图片模糊加载效果 */
+.blur-load {
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.blur-load::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    animation: pulse 2.5s infinite;
+    background: #f3f4f6;
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+/* 渐进式加载效果 */
+.progressive {
+    position: relative;
+    display: block;
+    overflow: hidden;
+}
+
+.progressive img {
+    display: block;
+    width: 100%;
+    max-width: none;
+    height: auto;
+    border: 0 none;
+}
+
+.progressive img.preview {
+    filter: blur(2vw);
+    transform: scale(1.05);
+}
+
+.progressive img.reveal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    will-change: transform, opacity;
+    animation: progressiveReveal 1s ease-out;
+}
+
+@keyframes progressiveReveal {
+    0% {
+        transform: scale(1.05);
+        opacity: 0;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* 图片加载占位符 */
