@@ -1,0 +1,11 @@
+{
+  "name": "piying-website",
+  "version": "1.0.0",
+  "description": "宝鸡皮影戏展示网站",
+  "scripts": {
+    "compress": "node image-compress.js"
+  },
+  "dependencies": {
+    "sharp": "^0.32.6"
+  }
+} 

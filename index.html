@@ -19,7 +19,7 @@
 		<header id="navbar" class="fixed w-full top-0 z-50 transition-all duration-300 bg-transparent">
 			<div class="container mx-auto px-4 py-3 flex items-center justify-between">
 				<a href="#" class="flex items-center">
-					<img src="img/4ad3000bc82027b36a8c1d9f5058f66.jpg" 宝鸡皮影Logo" class="h-12 w-auto rounded-full">
+					<img src="https://cdn.jsdelivr.net/gh/cheng5212/piying/img/4ad3000bc82027b36a8c1d9f5058f66.jpg" alt="宝鸡皮影Logo" class="h-12 w-auto rounded-full" loading="lazy">
 					<span class="ml-2 text-xl font-bold text-white text-shadow" data-lang-key="logo-text">宝鸡非遗皮影</span>
 				</a>
 
@@ -76,16 +76,36 @@
 			<div class="absolute inset-0 z-0">
 				<div class="carousel relative h-full">
     <div class="carousel-item absolute inset-0 opacity-1 transition-opacity duration-1000">
-        <img src="img/c0840841691b3e4bde6a5cec07f5d3c.jpg" alt="皮影表演"
-            class="w-full h-full object-cover">
+        <picture>
+            <source 
+                srcset="https://cdn.jsdelivr.net/gh/cheng5212/piying/img/c0840841691b3e4bde6a5cec07f5d3c.webp"
+                type="image/webp"
+                media="(min-width: 1024px)"
+            >
+            <source 
+                srcset="https://cdn.jsdelivr.net/gh/cheng5212/piying/img/c0840841691b3e4bde6a5cec07f5d3c-md.webp"
+                type="image/webp"
+                media="(min-width: 640px)"
+            >
+            <source 
+                srcset="https://cdn.jsdelivr.net/gh/cheng5212/piying/img/c0840841691b3e4bde6a5cec07f5d3c-sm.webp"
+                type="image/webp"
+            >
+            <img 
+                src="https://cdn.jsdelivr.net/gh/cheng5212/piying/img/c0840841691b3e4bde6a5cec07f5d3c.jpg"
+                alt="皮影表演"
+                class="w-full h-full object-cover"
+                loading="lazy"
+            >
+        </picture>
     </div>
     <div class="carousel-item absolute inset-0 opacity-0 transition-opacity duration-1000">
         <img src="img/20ee6a96ddbc37d99f3a41456c0b396.png" alt="皮影制作"
-            class="w-full h-full object-cover">
+            class="w-full h-full object-cover" loading="lazy">
     </div>
     <div class="carousel-item absolute inset-0 opacity-0 transition-opacity duration-1000">
         <img src="img/3b88d2f7d589359722c32d530b4cccc.jpg" alt="传统皮影"
-            class="w-full h-full object-cover">
+            class="w-full h-full object-cover" loading="lazy">
     </div>
     <button class="carousel-prev absolute left-4 top-1/2 transform -translate-y-1/2 bg-black/50 text-white p-4 rounded-full hover:bg-black/70 transition-custom">
         <i class="fa fa-chevron-left"></i>
@@ -1111,7 +1131,7 @@
 						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-white">
 							<div class="space-y-6">
 								<div class="flex items-center">
-									<img src="img/4ad3000bc82027b36a8c1d9f5058f66.jpg" alt="宝鸡皮影Logo"
+									<img src="https://cdn.jsdelivr.net/gh/cheng5212/piying/img/4ad3000bc82027b36a8c1d9f5058f66.jpg" alt="宝鸡皮影Logo"
 										class="h-12 w-auto">
 									<span class="ml-2 text-xl font-bold text-white"
 										data-lang-key="logo-text">宝鸡非遗皮影</span>
@@ -1197,5 +1217,41 @@
 			class="fixed bottom-6 right-6 bg-primary text-white w-12 h-12 rounded-full flex items-center justify-center shadow-lg opacity-0 invisible transition-all duration-300 hover:bg-primary/90">
 			<i class="fa fa-chevron-up"></i>
 		</button>
+
+		<script>
+			// 添加图片加载优化
+			document.addEventListener('DOMContentLoaded', function() {
+				// 获取所有图片
+				const images = document.querySelectorAll('img');
+				
+				// 创建Intersection Observer
+				const imageObserver = new IntersectionObserver((entries, observer) => {
+					entries.forEach(entry => {
+						if (entry.isIntersecting) {
+							const img = entry.target;
+							// 设置src
+							if (img.dataset.src) {
+								img.src = img.dataset.src;
+								img.removeAttribute('data-src');
+							}
+							// 停止观察
+							observer.unobserve(img);
+						}
+					});
+				});
+				
+				// 观察所有图片
+				images.forEach(img => {
+					// 添加加载中的类
+					img.classList.add('image-loading');
+					// 设置data-src并开始观察
+					if (img.src) {
+						img.dataset.src = img.src;
+						img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+						imageObserver.observe(img);
+					}
+				});
+			});
+		</script>
 	</body>
 </html>
